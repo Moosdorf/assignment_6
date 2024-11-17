@@ -14,13 +14,12 @@ function Actor({p}) {
   if (p.gender === 1) {
     gender = "female";
   }
-  return (
-    <div>
-      <ImageFor extension = {p.profile_path}/>
-      <h1>{p.name}</h1> 
-      <p>Id: {p.id}</p> 
+  return (// extra features to show?
+    <div key={p.id}>
+      <ImageFor extension = {p.profile_path}/> 
+      <h1>{p.name }</h1> 
+      <p>Popularity score: {p.popularity}</p> 
       <p>Gender: {gender}</p> 
-
     </div>
   )
 }
@@ -29,22 +28,31 @@ function ImageFor(extension) {
   var url = "https://image.tmdb.org/t/p/w500";
 
   var imageUrl = (extension.extension) ? url + extension.extension : require('./man.png');
-
   return <img src={imageUrl}
               alt="No Image"/>
 
 }
+function SmallImageFor(extension) {
+  var url = "https://image.tmdb.org/t/p/w500";
 
-function KnownFor({ titles }) {
+  var imageUrl = url + extension.extension;
+  if (extension.extension) {
+    return <img style={{width: 45, height: 68}} src={imageUrl}/>
+  }
+
+}
+
+function KnownFor({ titles }) { // add images for titles
   if (titles && titles.length !== 0) {
     return (
       <div>
         <h2>Known For:</h2>
-        {titles.map((t, i) => (
+        {titles.map((t) => ( // extra features to show?
           <div>
-            <h4>{t.title}{t.name}</h4>
-            <p>Released: {t.release_date}{t.first_air_date}</p>
-            <p>{t.overview}</p>
+            <h4><SmallImageFor extension = {t.poster_path}/> {t.title}{t.name} </h4>
+            <p>Type: {t.media_type}. Released: {t.release_date}{t.first_air_date}</p>
+            <p> {t.overview}</p>
+            <hr/>
           </div>
         ))}
       </div>
@@ -87,6 +95,57 @@ function SearchForm() {
   
 }
 
+function Buttons({index, total, setIndex}) { 
+  // handle set index
+  const handleIndex = (i) => {
+    setIndex(() => i);
+  }
+
+  // declare arrays to store buttons
+  var toRender = []; // all items to render
+
+  // handle first button
+  if (index > 2) {
+    toRender.push(
+      <span>
+        <button key = {0} onClick = {() => handleIndex(0)} disabled = {index === 0}>
+          1
+        </button>
+        ...
+      </span>
+    );
+  }
+
+  // handle middle buttons
+  for (let i = index - 2; i < index + 3; i++) { // we want [n - 2, ..., n + 2] as long as we dont hit last or first index
+    if (i >= 0 && i < total) {
+      toRender.push(        
+      <span>    
+        <button key = {i} onClick = {() => handleIndex(i)} disabled = {index === i}>
+          {i + 1}
+        </button>
+      </span>)
+    }
+  }
+
+
+
+  // handle last button
+  if (index < total - 3) {
+    toRender.push(
+    <span>
+      ... 
+
+      <button key = {total} onClick = {() => handleIndex(total-1)} disabled = {index === total-1}>
+        {total}
+      </button>
+    </span>);
+  }
+
+
+    return <div>{toRender}</div>;
+}
+
 function App() {
   const params = new URLSearchParams(window.location.search);
   const keyword = params.get("search");
@@ -96,11 +155,13 @@ function App() {
 
   if (keyword) {
     persons = Search(keyword);
+  } else {
+    persons = Search("Spiel"); // just a default search
   }
   
   if (!persons || persons.length === 0) {
     return (<div className={'searchBar'}>
-              <SearchForm/>
+              <SearchForm key = {keyword}/>
             </div>)
   }
 
@@ -131,107 +192,9 @@ function App() {
   )
 }
 
-function Buttons({index, total, setIndex}) {
-  const handleIndex = (i) => {
-    setIndex(() => i);
-  }
-  var firstButton;
-  var lastButton;
-  var buttonIndexes = [];
-
-  if (index > 2) {
-    firstButton =  (<button key = {0} onClick = {() => handleIndex(0)} disabled = {index === 0}>
-                      {1}
-                    </button>);
-  }
-
-  for (let i = index - 2; i < index + 3; i++) {
-    if (i >= 0 && i < total) {
-      buttonIndexes.push(i);
-    }
-  }
-
-  if (index < 17) {
-    lastButton =  (<button key = {total} onClick = {() => handleIndex(total-1)} disabled = {index === total-1}>
-                      {total}
-                    </button>);
-  }
-
-  var buttons = Array.from(buttonIndexes, (buttonNum) => (
-    <button key = {buttonNum} onClick = {() => handleIndex(buttonNum)} disabled = {index === buttonNum}>
-        {buttonNum + 1}
-    </button>
-  ))
-
-  if (firstButton && lastButton) {
-    return (
-      <div>
-        {firstButton} ... {buttons} ... {lastButton}
-      </div>)
-  } else if (firstButton) {
-    return (
-      <div>
-        {firstButton} ... {buttons}
-      </div>)
-  } else {
-    return (
-      <div>
-        {buttons} ... {lastButton}
-      </div>)
-  }
-
-}
 
 
 
+// start app: cd desktop/ruc c sharp/assignment_6; npm start
 
 export default App;
-
-/*
-
-  const params = new URLSearchParams(window.location.search);
-  const keyword = params.get("search");
-  var persons;
-  if (keyword) {
-    persons = Search(keyword);
-  }
-
-  return (
-    <div>
-      <SearchForm/>
-    {
-      SearchResult(persons)
-    }
-    </div>
-  );
-
-  
-function SearchResult(persons) {
-  return (
-  <div>
-    <p>
-        {persons.map((p) => Actor(p))}
-    </p>
-  </div>);
-}
-
-function SearchForm() {
-  const [keyword, setKeyword] = useState("");
-  return (
-    <div>
-      <form>
-        
-        Search for people: <input name="search" value={keyword} placeholder='Search' onChange={e => setKeyword(e.target.value)}/>
-
-        <button type='submit'>
-          Search
-          </button>
-      </form>
-    </div>
-
-  )
-
-  
-}
-
-*/ 
