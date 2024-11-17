@@ -13,19 +13,21 @@ code {
     monospace;
 }
 
-.searchBar {
-  text-align: center;
-
+.searchBar, .personPage, .knownFor {
+  float: left;
 }
-
 .personPage {
-  display: block;
+  padding: auto;
+  width: 40%;
   text-align: center;
-  height: 100%;
 }
 
+.knownFor, .searchBar {
+  width: 30%;
+  text-align: left;
+}
 
-.searchButtons {
+.searchButtons, .searchBar{
   text-align: center;
   align-items: center;
 }

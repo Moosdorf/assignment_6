@@ -1,6 +1,5 @@
 import './App.css';
 import {useState, useEffect} from "react";
-import man from "./man.png";
 
 // EXAMPLE https://api.themoviedb.org/3/movie/550?api_key=c8190d104e34c4f62a2be88afa477327
 // KEY c8190d104e34c4f62a2be88afa477327
@@ -27,7 +26,7 @@ function Actor({p}) {
 }
 
 function ImageFor(extension) {
-  var url = "https://image.tmdb.org/t/p/w45";
+  var url = "https://image.tmdb.org/t/p/w500";
 
   var imageUrl = (extension.extension) ? url + extension.extension : require('./man.png');
 
@@ -42,7 +41,11 @@ function KnownFor({ titles }) {
       <div>
         <h2>Known For:</h2>
         {titles.map((t, i) => (
-          <p>Movie {i+1}: {t.title}{t.name}</p>
+          <div>
+            <h4>{t.title}{t.name}</h4>
+            <p>Released: {t.release_date}{t.first_air_date}</p>
+            <p>{t.overview}</p>
+          </div>
         ))}
       </div>
     );
@@ -96,7 +99,7 @@ function App() {
   }
   
   if (!persons || persons.length === 0) {
-    return (<div>
+    return (<div className={'searchBar'}>
               <SearchForm/>
             </div>)
   }
@@ -104,20 +107,25 @@ function App() {
   const total = persons.length;
 
   return (
-    <div>
+    <div className='container'>
+
       <div className={'searchBar'}>
         <SearchForm/>
-        <hr/>
+        <div className='searchButtons'>
+          <p> Actors from keywords: {keyword}. Total actors from query = {total} </p>
+          <p> Page: {index + 1} </p>
+          <Buttons index={index} total={total} setIndex={setIndex}/>
+          <hr/>
+        </div>
       </div>
+
       <div className='personPage'>
-        <Actor p = {persons[index]}/>
-        <KnownFor titles = {persons[index].known_for}/>
-        <hr/>
+        <div className='actor'>
+          <Actor p = {persons[index]}/>
+        </div>
       </div>
-      <div className='searchButtons'>
-        <p> Actors from keywords: {keyword}. Total actors from query = {total} </p>
-        <p> Page: {index + 1} </p>
-        <Buttons index={index} total={total} setIndex={setIndex}/>
+      <div className='knownFor'>
+        <KnownFor className='titles' titles = {persons[index].known_for}/>
       </div>
     </div>
   )
@@ -127,18 +135,54 @@ function Buttons({index, total, setIndex}) {
   const handleIndex = (i) => {
     setIndex(() => i);
   }
-  
+  var firstButton;
+  var lastButton;
+  var buttonIndexes = [];
 
-  
+  if (index > 2) {
+    firstButton =  (<button key = {0} onClick = {() => handleIndex(0)} disabled = {index === 0}>
+                      {1}
+                    </button>);
+  }
 
-  return (<div>
-          {Array.from({length : total}, (_, i) => (
-            <button key = {i} onClick = {() => handleIndex(i)} disabled = {index === i}>
-                {i + 1}
-            </button>
-          ))}
-    </div>)
+  for (let i = index - 2; i < index + 3; i++) {
+    if (i >= 0 && i < total) {
+      buttonIndexes.push(i);
+    }
+  }
+
+  if (index < 17) {
+    lastButton =  (<button key = {total} onClick = {() => handleIndex(total-1)} disabled = {index === total-1}>
+                      {total}
+                    </button>);
+  }
+
+  var buttons = Array.from(buttonIndexes, (buttonNum) => (
+    <button key = {buttonNum} onClick = {() => handleIndex(buttonNum)} disabled = {index === buttonNum}>
+        {buttonNum + 1}
+    </button>
+  ))
+
+  if (firstButton && lastButton) {
+    return (
+      <div>
+        {firstButton} ... {buttons} ... {lastButton}
+      </div>)
+  } else if (firstButton) {
+    return (
+      <div>
+        {firstButton} ... {buttons}
+      </div>)
+  } else {
+    return (
+      <div>
+        {buttons} ... {lastButton}
+      </div>)
+  }
+
 }
+
+
 
 
 export default App;
