@@ -42,8 +42,9 @@ function ImageFor(extension) {
 
   // the image url is a combination of the static url and the argument given.
   // if no image is available display a generic picture of a person 
-  var imageUrl = (extension.extension) ? url + extension.extension : require('./man.png');
-  return <img style={{width: 300, height: 450}} src={imageUrl}
+  var imageUrl = (extension.extension) ? url + extension.extension : require('./man.png'); 
+  var personStyle = (extension.extension) ? {width: 300, height: 450} : {}; // set style based on picture chosen (default or not)
+  return <img style={personStyle} src={imageUrl}
               alt="No Image"/>
 
 }
@@ -60,8 +61,12 @@ function SmallImageFor(extension) {
 
 }
 
+var FirstLetterUppercase = (string) => { // make first letter uppercase. useful for "movie" and "tv".
+  var firstChar = string[0].toUpperCase();
+  return firstChar + string.slice(1); // slice removes all index below input (first letter in this case, index 0)
+}
 
-function KnownFor({ titles }) { // known for component
+function KnownFor({ titles }) { // known for component (display all titles person is known for)
   if (titles && titles.length !== 0) { // the person must have titles otherwise we return a simple string in a p element
     return (
       <div>
@@ -70,7 +75,8 @@ function KnownFor({ titles }) { // known for component
           // using t.release_date and t.first_air_date, this is because if its a movie it has one, if tv then another. wont affect eachother
           <div>
             <h4><SmallImageFor extension = {t.poster_path}/> {t.title}{t.name} </h4> 
-            <p>Type: {t.media_type}. Released: {t.release_date}{t.first_air_date}</p>
+            <p>Released: {t.release_date}{t.first_air_date}</p>
+            <p>{FirstLetterUppercase(t.media_type)}.</p>
             <p> {t.overview}</p>
             <hr/>
           </div>
@@ -104,11 +110,11 @@ function SearchForm() { // basic search form, input and a search button that use
     <div className='searchForm'>
       <form>
         
-        <input name="search" value={keyword} placeholder='Search' onChange={e => setKeyword(e.target.value)}/>
+        <input className='search' name="search" value={keyword} placeholder='Search' onChange={e => setKeyword(e.target.value)}/>
 
         <button type='submit'> 
-          Search {// submit the search. url will look like localhost:3000/search=something
-                  // we can fetch the search keyword later.
+          Search {/* submit the search. url will look like localhost:3000/search=something
+                   we can fetch the search keyword later.*/
                   } 
           </button>
       </form>
@@ -131,13 +137,13 @@ function Buttons({index, total, setIndex}) {
   // handle first button
   // add the first button if index is larger than 2.
   // as we want N - 2 and N + 2, then we must remove the "first" button wehen the index is 2.
-  if (index > 1) {
+  if (index > 2) {
     toRender.push( // push the first button and string of ... to indicate there are buttons hidden
       <span>
-        <button key = {0} onClick = {() => handleIndex(0)} disabled = {index === 0}>
+        <button className='pageButton' key = {0} onClick = {() => handleIndex(0)} disabled = {index === 0}>
           1
         </button>
-        ...
+        <span style={{'padding-right': 10, 'padding-left': 10}}>...</span> 
       </span>
     );
   }
@@ -148,7 +154,7 @@ function Buttons({index, total, setIndex}) {
     if (i >= 0 && i < total) { // cant be larger or equal to total, and it cant be below minimum.
       toRender.push( // we must then push each button that fit
       <span>    
-        <button key = {i} onClick = {() => handleIndex(i)} disabled = {index === i}>
+        <button className='pageButton' key = {i} onClick = {() => handleIndex(i)} disabled = {index === i}>
           {i + 1}
         </button>
       </span>)
@@ -161,8 +167,8 @@ function Buttons({index, total, setIndex}) {
   if (index < total - 3) {
     toRender.push(
     <span>
-      ... 
-      <button key = {total} onClick = {() => handleIndex(total-1)} disabled = {index === total-1}>
+      <span style={{'padding-right': 10, 'padding-left': 10}}>...</span> 
+      <button className='pageButton' key = {total} onClick = {() => handleIndex(total-1)} disabled = {index === total-1}>
         {total}
       </button>
     </span>);
@@ -188,7 +194,7 @@ function App() {
   
   if (!persons || persons.length === 0) { 
     if (keyword) {
-      message = `No people found with "${keyword}"!`;
+      message = `No results found for: "${keyword}".`;
     }
     return (
       <div className='container'>
@@ -209,11 +215,11 @@ function App() {
   const total = persons.length;
 
 
-  return (
+  return ( // using bootstrap for the structure. We can specify how many grids something fills. e.g 'col-4' fills 4 grids, 
+                                                                                          // and the other fills the rest
     <div className='container'>
       <div className='row'>
         <div className='col'>
-        
           <div className='searchForm'>
             <SearchForm/>
             <br/>
@@ -237,6 +243,6 @@ function App() {
 
 
 
-// start app: cd desktop/ruc c sharp/assignment_6; npm start
+// start app: cd desktop/ruc c sharp/assignment_6 
 
 export default App;
