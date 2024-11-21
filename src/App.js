@@ -23,11 +23,13 @@ function Actor({p}) {
   if (p.gender === 1) { // if the gender value is 1, set to female
     gender = "female";
   }
+  gender = FirstLetterUppercase(gender);
   return ( // we will display an image of the person, their name, as well as their popularity and gender
     <div className='personRight' key={p.id}>
-      <ImageFor extension = {p.profile_path}/> 
-      <h1>{p.name }</h1> 
+      <ImageFor extension = {p.profile_path}/>
+      <h1>{p.name}</h1> 
       <p>Popularity score: {p.popularity}</p> 
+      <p>Department: {p.known_for_department}</p> 
       <p>Gender: {gender}</p> 
     </div>
   )
@@ -35,15 +37,15 @@ function Actor({p}) {
 
 // image for is a function that takes an extension, which is obtained from a person profile or title profile
 // example extension: "/tZxcg19YQ3e8fJ0pOs7hjlnmmr6.jpg"
-function ImageFor(extension) { 
+function ImageFor({ extension }) { 
   var url = "https://image.tmdb.org/t/p/w500"; // w500 specifies the width of the image, 
                         // we use a large image to scale it down an retain the nice quality
                         // could add a parameter to specify this, we might need different sizes
 
   // the image url is a combination of the static url and the argument given.
   // if no image is available display a generic picture of a person 
-  var imageUrl = (extension.extension) ? url + extension.extension : require('./man.png'); 
-  var personStyle = (extension.extension) ? {width: 300, height: 450} : {}; // set style based on picture chosen (default or not)
+  var imageUrl = (extension) ? url + extension : require('./man.png'); 
+  var personStyle = (extension) ? {width: 300, height: 450} : {}; // set style based on picture chosen (default or not)
   return <img style={personStyle} src={imageUrl}
               alt="No Image"/>
 
@@ -51,11 +53,11 @@ function ImageFor(extension) {
 
 // Obtain a smaller image, this is useful for known for movie posters.
 
-function SmallImageFor(extension) {
+function SmallImageFor({extension}) {
   var url = "https://image.tmdb.org/t/p/w500";
 
-  var imageUrl = url + extension.extension;
-  if (extension.extension) {
+  var imageUrl = url + extension;
+  if (extension) {
     return <img style={{width: 45, height: 68}} src={imageUrl}/>
   }
 
@@ -69,19 +71,20 @@ var FirstLetterUppercase = (string) => { // make first letter uppercase. useful 
 function KnownFor({ titles }) { // known for component (display all titles person is known for)
   if (titles && titles.length !== 0) { // the person must have titles otherwise we return a simple string in a p element
     return (
-      <div>
+      <>
         <h2>Known For:</h2> 
+
         {titles.map((t) => ( // mapping each title to a div that contains an image, kind of media, release_Date and an overview 
           // using t.release_date and t.first_air_date, this is because if its a movie it has one, if tv then another. wont affect eachother
-          <div>
-            <h4><SmallImageFor extension = {t.poster_path}/> {t.title}{t.name} </h4> 
-            <p>Released: {t.release_date}{t.first_air_date}</p>
+          <div> 
+            <h4><SmallImageFor extension = {t.poster_path}/> {(t.title) ? t.title : t.name}</h4> 
+            <p>Released: {(t.title) ? t.release_date : t.first_air_date}</p>
             <p>{FirstLetterUppercase(t.media_type)}.</p>
-            <p> {t.overview}</p>
+            <p>{t.overview}</p>
             <hr/>
           </div>
         ))} 
-      </div>
+      </>
     );
   }
 
@@ -95,9 +98,10 @@ function Search(keyword) {
   let key = "c8190d104e34c4f62a2be88afa477327";
   let query = `https://api.themoviedb.org/3/search/person?query=${keyword}&api_key=${key}`;
   useEffect(() => { // fetch the data, then store in json, then using the updater input the result into persons
-      fetch(query)
+      fetch(query) 
       .then(res => res.json())
-      .then(data => setPersons(data.results))
+      .then(data => setPersons(data.results)) // we only take the result from page 1, so up to 20 people
+                                              // we could get more results, but have limited our program to this.
     }, []);
 
   return persons; // and return the list of people
@@ -107,8 +111,7 @@ function SearchForm() { // basic search form, input and a search button that use
                         // this searching is just extra practice. By default the site searches for spielberg hardcoded
   const [keyword, setKeyword] = useState("");
   return (
-    <div className='searchForm'>
-      <form>
+      <form className='searchForm'>
         
         <input className='search' name="search" value={keyword} placeholder='Search' onChange={e => setKeyword(e.target.value)}/>
 
@@ -118,7 +121,6 @@ function SearchForm() { // basic search form, input and a search button that use
                   } 
           </button>
       </form>
-    </div>
 
   )
 
@@ -128,7 +130,7 @@ function SearchForm() { // basic search form, input and a search button that use
 function Buttons({index, total, setIndex}) { 
   // handle set index
   const handleIndex = (i) => {
-    setIndex(() => i);
+    setIndex(i);
   }
 
   // declare arrays to store buttons
@@ -139,12 +141,12 @@ function Buttons({index, total, setIndex}) {
   // as we want N - 2 and N + 2, then we must remove the "first" button wehen the index is 2.
   if (index > 2) {
     toRender.push( // push the first button and string of ... to indicate there are buttons hidden
-      <span>
+      <>
         <button className='pageButton' key = {0} onClick = {() => handleIndex(0)} disabled = {index === 0}>
           1
         </button>
         <span style={{'padding-right': 10, 'padding-left': 10}}>...</span> 
-      </span>
+      </>
     );
   }
 
@@ -153,11 +155,11 @@ function Buttons({index, total, setIndex}) {
   for (let i = index - 2; i < index + 3; i++) { // we want [n - 2, ..., n + 2] as long as we dont hit last or first index
     if (i >= 0 && i < total) { // cant be larger or equal to total, and it cant be below minimum.
       toRender.push( // we must then push each button that fit
-      <span>    
+      <>    
         <button className='pageButton' key = {i} onClick = {() => handleIndex(i)} disabled = {index === i}>
           {i + 1}
         </button>
-      </span>)
+      </>)
     }
   }
 
@@ -166,21 +168,24 @@ function Buttons({index, total, setIndex}) {
   // handle last button
   if (index < total - 3) {
     toRender.push(
-    <span>
+    <>
       <span style={{'padding-right': 10, 'padding-left': 10}}>...</span> 
       <button className='pageButton' key = {total} onClick = {() => handleIndex(total-1)} disabled = {index === total-1}>
         {total}
       </button>
-    </span>);
+    </>);
   }
 
 
-    return <div>{toRender}</div>; // return everything, should match up with: button ... buttons ... button.
+    return <>{toRender}</>; // return everything, should match up with: button ... buttons ... button.
 }
 
 function App() {
+  // search keyword if any
   const params = new URLSearchParams(window.location.search); // if a search has been made, this object will contain it
   const keyword = params.get("search"); // try to get keyword out
+  
+  // paging
   const [index, setIndex] = useState(0); // paging initially set to 0
   
   let persons; // define empty list of people to display
@@ -189,7 +194,7 @@ function App() {
   if (keyword) { // if a keyword has been entered we will search for it
     persons = Search(keyword);
   } else { 
-    persons = Search("Spiel"); // else just a default search
+    persons = Search("Ian"); // else just a default search
   }
   
   if (!persons || persons.length === 0) { 
