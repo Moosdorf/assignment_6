@@ -1,4 +1,5 @@
 /*added*/
+
 .searchBar, .personPage, .knownFor {
   float: left;
 }
@@ -18,13 +19,49 @@
   align-items: center;
 }
 
+/* Pagination */
 .pageButton {
-  width: 40px;
+  margin: 0 5px;
+  border: none;
+  border-radius: 25px;
+  background-color: #808080 ; 
+  transition: all 0.2s ease;
 }
 
+/* Highlight active page button */
+.pageButton.active {
+  background-color: #cccccc;
+}
+
+/* Highlight hovering page button */
+.pageButton:hover {
+  background-color: #8d8d8d;
+  color: #fff;
+  transform: scale(1.25);
+}
+
+/* Search input field */
 .search {
-  margin-right: 10px;
-  margin-top: 1px;
+  outline: none;
+  border: 1px solid #808080;
+  padding: 8px;
+  width: 250px;
+  border-radius: 25px;
+}
+
+.searchForm button {
+  padding: 5px 15px;
+  margin-left: 10px;
+  border: none;
+  border-radius: 25px;
+  background-color: #808080;
+  color: white;
+  transition: all 0.3s ease;
+}
+
+.searchForm button:hover {
+  background-color: #a9a9b396;
+  transform: scale(1.15);
 }
 
 .largePicture {

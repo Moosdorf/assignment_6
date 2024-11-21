@@ -115,7 +115,7 @@ function SearchForm() { // basic search form, input and a search button that use
         
         <input className='search' name="search" value={keyword} placeholder='Search' onChange={e => setKeyword(e.target.value)}/>
 
-        <button type='submit'> 
+        <button type='submit'>
           Search {/* submit the search. url will look like localhost:3000/search=something
                    we can fetch the search keyword later.*/
                   } 
@@ -136,6 +136,19 @@ function Buttons({index, total, setIndex}) {
   // declare arrays to store buttons
   var toRender = []; // will store all items to render
 
+  // handle left button
+  if (index > 0) { 
+    toRender.push(
+      <button
+        className="pageButton"
+        onClick={() => handleIndex(index - 1)}
+        disabled={index === 0}
+      >
+        &larr;
+      </button>
+    );
+  }
+
   // handle first button
   // add the first button if index is larger than 2.
   // as we want N - 2 and N + 2, then we must remove the "first" button wehen the index is 2.
@@ -145,7 +158,7 @@ function Buttons({index, total, setIndex}) {
         <button className='pageButton' key = {0} onClick = {() => handleIndex(0)} disabled = {index === 0}>
           1
         </button>
-        <span style={{'padding-right': 10, 'padding-left': 10}}>...</span> 
+        <span style={{paddingLeft: '10px', paddingRight: '10px' }}>...</span> 
       </>
     );
   }
@@ -156,7 +169,7 @@ function Buttons({index, total, setIndex}) {
     if (i >= 0 && i < total) { // cant be larger or equal to total, and it cant be below minimum.
       toRender.push( // we must then push each button that fit
       <>    
-        <button className='pageButton' key = {i} onClick = {() => handleIndex(i)} disabled = {index === i}>
+        <button className={`pageButton ${index === i ? "active" : ""}`} key = {i} onClick = {() => handleIndex(i)} disabled = {index === i}>
           {i + 1}
         </button>
       </>)
@@ -169,13 +182,25 @@ function Buttons({index, total, setIndex}) {
   if (index < total - 3) {
     toRender.push(
     <>
-      <span style={{'padding-right': 10, 'padding-left': 10}}>...</span> 
+      <span style={{paddingLeft: '10px', paddingRight: '10px' }}>...</span> 
       <button className='pageButton' key = {total} onClick = {() => handleIndex(total-1)} disabled = {index === total-1}>
         {total}
       </button>
     </>);
   }
 
+  // handle right button
+  if (index < total - 1) {
+    toRender.push(
+      <button // Right button (&rarr; right arrow)
+        className="pageButton"
+        onClick = {() => handleIndex(index + 1)}
+        disabled={index === total}
+      >
+        &rarr; 
+      </button> 
+    );
+  }
 
     return <>{toRender}</>; // return everything, should match up with: button ... buttons ... button.
 }
@@ -226,6 +251,7 @@ function App() {
       <div className='row'>
         <div className='col'>
           <div className='searchForm'>
+            <br/>
             <SearchForm/>
             <br/>
             <Buttons index={index} total={total} setIndex={setIndex}/>
