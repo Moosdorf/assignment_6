@@ -47,7 +47,7 @@ function ImageFor({ extension }) {
   var imageUrl = (extension) ? url + extension : require('./man.png'); 
   var personStyle = (extension) ? {width: 300, height: 450} : {}; // set style based on picture chosen (default or not)
   return <img style={personStyle} src={imageUrl}
-              alt="No Image"/>
+              alt="None"/>
 
 }
 
@@ -58,7 +58,7 @@ function SmallImageFor({extension}) {
 
   var imageUrl = url + extension;
   if (extension) {
-    return <img style={{width: 45, height: 68}} src={imageUrl}/>
+    return <img style={{width: 45, height: 68}} src={imageUrl} alt='None'/>
   }
 
 }
@@ -102,7 +102,7 @@ function Search(keyword) {
       .then(res => res.json())
       .then(data => setPersons(data.results)) // we only take the result from page 1, so up to 20 people
                                               // we could get more results, but have limited our program to this.
-    }, []);
+    }, [query]);
 
   return persons; // and return the list of people
 }
@@ -206,12 +206,12 @@ function Buttons({index, total, setIndex}) {
 }
 
 function App() {
+  // paging
+  const [index, setIndex] = useState(0); // paging initially set to 0
+
   // search keyword if any
   const params = new URLSearchParams(window.location.search); // if a search has been made, this object will contain it
   const keyword = params.get("search"); // try to get keyword out
-  
-  // paging
-  const [index, setIndex] = useState(0); // paging initially set to 0
   
   let persons; // define empty list of people to display
   let message = "Search for any person!";
@@ -219,7 +219,7 @@ function App() {
   if (keyword) { // if a keyword has been entered we will search for it
     persons = Search(keyword);
   } else { 
-    persons = Search("Ian"); // else just a default search
+    persons = Search("Spiel"); // else just a default search
   }
   
   if (!persons || persons.length === 0) { 
@@ -270,10 +270,5 @@ function App() {
     </div>
   )
 }
-
-
-
-
-// start app: cd desktop/ruc c sharp/assignment_6 
 
 export default App;
